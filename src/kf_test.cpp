@@ -14,20 +14,7 @@
 #include "kf.hpp"
 #include <iomanip>
 
-
-// class myRobot : public KFilter{
-
-//     public:
-//         double i;
-//         myRobot(const Eigen::MatrixXd& A,
-//                 const Eigen::MatrixXd& B, 
-//                 const Eigen::MatrixXd& C,
-//                 const Eigen::MatrixXd& Q
-//                 ) : KFilter(A, B, C, Q) {}
-// };
-
 using namespace std;
-
 
 int main(int argc, char** argv){
 
@@ -84,7 +71,7 @@ int main(int argc, char** argv){
     KFilter DesertFox(A, B, C, Q, R);
     DesertFox.init(mu_0, Sigma_0);
 
-    for (int i = 0; i < 100; i++){
+    for (int i = 0; i < 10000; i++){
 
         std::cout << std::setprecision(2) << "Time: " << i * dt << "s" << endl;
 
