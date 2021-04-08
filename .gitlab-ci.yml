@@ -1,0 +1,28 @@
+image: gcc
+
+stages:
+  - build
+  - test
+ 
+
+
+build:
+  stage: build
+  before_script:
+    - apt-get update --yes
+    - apt-get install --yes cmake
+    - apt-get install libeigen3-dev
+
+  script:
+    - mkdir build
+    - cd build
+    - cmake .. && make
+  artifacts:
+    paths:
+      - build
+
+# run tests using the binary built before
+test:
+  stage: test
+  script:
+    - ./build/kf-test

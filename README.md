@@ -1,6 +1,10 @@
 # Kalman Filter
 
+# Overview
+
 Kalman Filter Algorithm:
+
+
 
 ### Step 1: **Prediciton** $`({\mu_{t-1}, {\textstyle\sum}_{t-1}, u_t})`$
 
@@ -22,7 +26,8 @@ $`\textbf{Return} \left(\mu_t, \textstyle\sum_t\right)`$
 
 
 
-## Usage
+## Installation and Usage
+
 
 To run it, use CMake:
 
