@@ -18,29 +18,31 @@
 
 using namespace std;
 
-class DynSystem{
+class LinearSystem{
 
-    Eigen::MatrixXd A, B, C;
+    Eigen::MatrixXd A, B, Q;
 
-    int m, n, c;
+    int n;
 
-    double dt;
-    
-    Eigen::VectorXd x_hat, mu_hat;
-    
     public:
+      
+        Eigen::VectorXd mu_hat;
 
-    DynSystem(  
-            const Eigen::MatrixXd& A,
-            const Eigen::MatrixXd& B, 
-            const Eigen::MatrixXd& C,
-            double dt
-    );
+        Eigen::MatrixXd Sigma_hat;
 
-    ~DynSystem() {};
+        LinearSystem(  
+                const Eigen::MatrixXd& A,
+                const Eigen::MatrixXd& B, 
+                const Eigen::MatrixXd& Q
+        );
 
-    void init();
+        ~LinearSystem() {};
 
-    void init(const Eigen::VectorXd& x0);
+        void init();
+
+        void init(const Eigen::VectorXd& mu_0, Eigen::MatrixXd& Sigma_0);
+
+        void time_update(const Eigen::MatrixXd& u);
 };
+
 #endif

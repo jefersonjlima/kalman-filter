@@ -5,7 +5,7 @@
  * -------------------------------------------------------------------------- */
 
 /**
- *  @file   ekf.h
+ *  @file   model.h
  *  @author Jeferson Lima
  *  @brief  Source file for Dynamic Model
  *  @date   April 07, 2021
@@ -13,19 +13,26 @@
 
 #include "model.hpp"
 
-DynSystem::DynSystem(  
+LinearSystem::LinearSystem(  
     const Eigen::MatrixXd& A,
     const Eigen::MatrixXd& B, 
-    const Eigen::MatrixXd& C,
-    double dt)
-    : A(A), B(B), C(C), dt(dt),
-    m(C.rows()), n(A.rows()), c(B.cols()),
-    x_hat(n), mu_hat(n) {}
+    const Eigen::MatrixXd& Q
+    ) : A(A), B(B), Q(Q),
+    n(A.rows()), mu_hat(n), Sigma_hat(n,n) {}
 
-void DynSystem::init(const Eigen::VectorXd& x0){
-    x_hat = x0;
+void LinearSystem::init(const Eigen::VectorXd& mu_0, Eigen::MatrixXd& Sigma_0){
+    mu_hat = mu_0;
+    Sigma_hat = Sigma_0;
 }
 
-void DynSystem::init(){
-    x_hat.setZero();
-}  
+void LinearSystem::init(){
+    mu_hat.setZero();
+    Sigma_hat.setZero();
+}
+
+void LinearSystem::time_update(const Eigen::MatrixXd& u){
+
+    mu_hat  = A * mu_hat + B * u;
+    Sigma_hat = A * Sigma_hat * A.transpose() + Q;
+}
+
