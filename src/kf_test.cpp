@@ -14,6 +14,13 @@
 #include "kf.hpp"
 #include <iomanip>
 
+template<class T>
+class A {
+    A();
+    T x;
+
+};
+
 using namespace std;
 
 int main(int argc, char** argv){
@@ -68,20 +75,21 @@ int main(int argc, char** argv){
     std::cout << "Sigma_0: \n" << Sigma_0 << std::endl;
 
 
-    KFilter DesertFox(A, B, C, Q, R);
-    DesertFox.init(mu_0, Sigma_0);
+    KFilter Robot(A, B, C, Q, R);
+    Robot.init(mu_0, Sigma_0);
 
-    for (int i = 0; i < 10000; i++){
+    for (int i = 0; i < 100; i++){
 
         std::cout << std::setprecision(2) << "Time: " << i * dt << "s" << endl;
 
         //prediction
-        DesertFox.time_update(u);
+        Robot.time_update(u);
 
         //update
-        DesertFox.measurement_update(z);
+        Robot.measurement_update(z);
 
-        std::cout << "mu: \n" << DesertFox.mu_hat << std::endl;
+        std::cout << "x_0: " << Robot.mu_hat[0] << std::endl;
+        std::cout << "x_1: " << Robot.mu_hat[1] << std::endl;
     }
 
     return 0;
