@@ -29,7 +29,7 @@ void LinearSystem::time_update(const Eigen::MatrixXd& u){
 
 ### Step 2:
 
-$\textbf{Measurement Update}(\overline{\mu}_{t}, \overline{\textstyle\sum}_{t}, z_t)`$:
+$`\textbf{Measurement Update}(\overline{\mu}_{t}, \overline{\textstyle\sum}_{t}, z_t)`$:
 
 $`\quad\quad K_t = \overline{\textstyle\sum}_tC_t^T(C_t\overline{\textstyle\sum}_tC_t^T+R_t)^{-1}`$
 
