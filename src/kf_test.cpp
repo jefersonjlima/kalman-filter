@@ -14,13 +14,6 @@
 #include "kf.hpp"
 #include <iomanip>
 
-template<class T>
-class A {
-    A();
-    T x;
-
-};
-
 using namespace std;
 
 int main(int argc, char** argv){
