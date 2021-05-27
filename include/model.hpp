@@ -18,7 +18,8 @@
 
 using namespace std;
 
-class LinearSystem{
+/* @brief Linear Model */
+class Linear{
 
     Eigen::MatrixXd A, B, Q;
 
@@ -26,23 +27,41 @@ class LinearSystem{
 
     public:
       
-        Eigen::VectorXd mu_hat;
-
-        Eigen::MatrixXd Sigma_hat;
-
-        LinearSystem(  
-                const Eigen::MatrixXd& A,
-                const Eigen::MatrixXd& B, 
-                const Eigen::MatrixXd& Q
+        Linear(  
+            const Eigen::MatrixXd& A,
+            const Eigen::MatrixXd& B, 
+            const Eigen::MatrixXd& Q
         );
 
-        ~LinearSystem() {};
+        ~Linear() {};
 
         void init();
 
         void init(const Eigen::VectorXd& mu_0, Eigen::MatrixXd& Sigma_0);
 
         void time_update(const Eigen::MatrixXd& u);
+
+        Eigen::VectorXd mu_hat;
+
+        Eigen::MatrixXd Sigma_hat;
+
+};
+
+
+/* @brief Nonlinear Model */
+class NonLinear : public Linear
+{
+
+    public:
+      
+        NonLinear(const Eigen::MatrixXd& Q);
+
+        ~NonLinear() {};
+
+        void time_update(const Eigen::MatrixXd& u);
+
+        /* Calc Jacobian Matrix */
+        virtual void approx_update() {};
 };
 
 #endif

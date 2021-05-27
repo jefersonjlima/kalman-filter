@@ -14,6 +14,7 @@
 #include "kf.hpp"
 #include <iomanip>
 
+
 using namespace std;
 using namespace Eigen;
 
@@ -22,7 +23,6 @@ int main(int argc, char** argv){
     int n = 3; // Number of states
     int m = 1; // Number of measurements
     int c = 1; // Number of control inputs
-
 
     double dt = 1.0/30; // Time step
 
@@ -70,7 +70,7 @@ int main(int argc, char** argv){
     cout << "Sigma_0: \n" << Sigma_0 << endl;
 
 
-    KFilter Robot(A, B, C, Q, R);
+    KFilter<NonLinear> Robot(Q);
     Robot.init(mu_0, Sigma_0);
 
     for (int i = 0; i < 10; i++){
