@@ -11,93 +11,108 @@
  *  @date   April 07, 2021
  **/
 
-class jacobModel{
-
-    public:
-        jacobModel(){};
-
-        ~jacobModel(){};
-
-    private:
-
-};
-
-
 #include "kf.hpp"
 #include <iomanip>
 
 using namespace std;
 using namespace Eigen;
 
-int main(int argc, char** argv){
+std::tuple<MatrixXd, MatrixXd, VectorXd> l(
+    const Eigen::MatrixXd A,
+    const Eigen::MatrixXd B,
+    const VectorXd &mu)
+{
+  int n = 3; // Number of states
+  int m = 1; // Number of measurements
+  int c = 1; // Number of control inputs
+  MatrixXd z(m, m);
 
-    int n = 3; // Number of states
-    int m = 1; // Number of measurements
-    int c = 1; // Number of control inputs
+  z << 0.1;
 
+  return {A, B, z};
+}
 
-    double dt = 1.0/30; // Time step
+int main(int argc, char **argv)
+{
 
-    MatrixXd A(n, n);    // System dynamics matrix
-    MatrixXd B(n, c);    // Input control matrix
-    MatrixXd C(m, n);    // Output matrix
-    
-    //initial conditions
-    VectorXd mu_0(n,m);
-    MatrixXd z(m,m);
-    MatrixXd u(c,c);
-    MatrixXd Sigma_0(n,n);  
-    MatrixXd Q(n,n);     //covariance of the process noise;
-    MatrixXd R(m,m);     //covariance of the observation noise;
+  int n = 3; // Number of states
+  int m = 1; // Number of measurements
+  int c = 1; // Number of control inputs
 
-    // Model
-    A << 1.0, dt, 0.0,
-         0.0, 1.0, dt,
-         0.0, 0.0, 1.0;
-    B << 0.0, 0.0, 0.0;
-    C << 1.0, 0.0, 0.0;
+  double dt = 1.0 / 30; // Time step
 
-    mu_0 << 1.0, 0.0 , 0.0;
-    z << 0.1;
-    u << 0.3;
+  MatrixXd A(n, n); // System dynamics matrix
+  MatrixXd B(n, c); // Input control matrix
+  MatrixXd C(m, n); // Output matrix
 
-    Sigma_0 <<  1.0, 0.0 , 0.0,
-                0.0, 1.0 , 0.0,
-                0.0, 0.0 , 1.0;
-    
-    Q << 1.0, 0.0 , 0.0,
-         0.0, 1.0 , 0.0,
-         0.0, 0.0 , 1.0;
+  //initial conditions
+  VectorXd mu_0(n, m);
+  MatrixXd z(m, m);
+  MatrixXd u(c, c);
+  MatrixXd Sigma_0(n, n);
+  MatrixXd Q(n, n); //covariance of the process noise;
+  MatrixXd R(m, m); //covariance of the observation noise;
 
-    R << 0.01;
+  // Model
+  A << 1.0, dt, 0.0,
+      0.0, 1.0, dt,
+      0.0, 0.0, 1.0;
+  B << 0.0, 0.0, 0.0;
+  C << 1.0, 0.0, 0.0;
 
-    cout << "A: \n" << A << endl;
-    cout << "B: \n" << B << endl;
-    cout << "C: \n" << C << endl;
+  mu_0 << 1.0, 0.0, 0.0;
+  z << 0.1;
+  u << 0.3;
 
-    cout << "R: \n" << R << endl;
-    cout << "Q: \n" << Q << endl;
+  Sigma_0 << 1.0, 0.0, 0.0,
+      0.0, 1.0, 0.0,
+      0.0, 0.0, 1.0;
 
-    cout << "mu_0: \n" << mu_0 << endl;
-    cout << "Sigma_0: \n" << Sigma_0 << endl;
+  Q << 1.0, 0.0, 0.0,
+      0.0, 1.0, 0.0,
+      0.0, 0.0, 1.0;
 
+  R << 0.01;
 
-    KFilter Robot(A, B, C, Q, R);
-    Robot.init(mu_0, Sigma_0);
+  cout << "A: \n"
+       << A << endl;
+  cout << "B: \n"
+       << B << endl;
+  cout << "C: \n"
+       << C << endl;
 
-    for (int i = 0; i < 10; i++){
+  cout << "R: \n"
+       << R << endl;
+  cout << "Q: \n"
+       << Q << endl;
 
-        cout << setprecision(2) << "Time: " << i * dt << "s" << endl;
+  cout << "mu_0: \n"
+       << mu_0 << endl;
+  cout << "Sigma_0: \n"
+       << Sigma_0 << endl;
 
-        //prediction
-        Robot.time_update(u);
+  KFilter<NonLinear> Robot(R, Q, m, c);
+  Robot.loadEq(l);
+  Robot.init(mu_0, Sigma_0);
 
-        //update
-        Robot.measurement_update(z);
+  auto mu = mu_0;
+  for (int i = 0; i < 10; i++)
+  {
 
-        cout << "x_0: " << Robot.mu_hat[0] << endl;
-        cout << "x_1: " << Robot.mu_hat[1] << endl;
-    }
+    cout << setprecision(2) << "Time: " << i * dt << "s" << endl;
 
-    return 0;
+    //linearization
+    mu = Robot.mu_hat;
+    Robot.applyTaylorJacobian();
+    //prediction
+    Robot.time_update(u);
+
+    //update
+    Robot.measurement_update(z);
+
+    cout << "x_0: " << Robot.mu_hat[0] << endl;
+    cout << "x_1: " << Robot.mu_hat[1] << endl;
+  }
+
+  return 0;
 }
