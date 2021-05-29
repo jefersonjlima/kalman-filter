@@ -24,3 +24,4 @@ test:
   stage: test
   script:
     - ./build/kf_test
+    - ./build/ekf_test

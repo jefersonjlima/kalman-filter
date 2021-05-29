@@ -18,31 +18,54 @@
 
 using namespace std;
 
-class LinearSystem{
+typedef Eigen::MatrixXd Mxd;
+typedef Eigen::VectorXd Vxd;
+typedef std::function<std::tuple<Mxd,Mxd,Mxd>(
+  const Mxd&, const Mxd&, const Vxd&)> taylorJacobian;
 
-    Eigen::MatrixXd A, B, Q;
+/* @brief Linear Model */
+class Linear
+{
 
-    int n;
+  int m, n, c;
 
-    public:
-      
-        Eigen::VectorXd mu_hat;
+public:
+  Linear(
+      const Eigen::MatrixXd &A,
+      const Eigen::MatrixXd &B,
+      const Eigen::MatrixXd &Q);
 
-        Eigen::MatrixXd Sigma_hat;
+  Linear(const Eigen::MatrixXd &Q, int m, int c);
 
-        LinearSystem(  
-                const Eigen::MatrixXd& A,
-                const Eigen::MatrixXd& B, 
-                const Eigen::MatrixXd& Q
-        );
+  ~Linear(){};
 
-        ~LinearSystem() {};
+  void init();
 
-        void init();
+  void init(const Eigen::VectorXd &mu_0, Eigen::MatrixXd &Sigma_0);
 
-        void init(const Eigen::VectorXd& mu_0, Eigen::MatrixXd& Sigma_0);
+  void time_update(const Eigen::MatrixXd &u);
 
-        void time_update(const Eigen::MatrixXd& u);
+  Eigen::MatrixXd A, B, Q;
+
+  Eigen::VectorXd mu_hat;
+
+  Eigen::MatrixXd Sigma_hat;
+};
+
+/* @brief Nonlinear Model */
+class NonLinear : public Linear
+{
+  taylorJacobian _J;
+
+public:
+  NonLinear(const Eigen::MatrixXd &Q, int m, int c);
+
+  ~NonLinear(){};
+
+  /* load model */
+  void loadEq(const taylorJacobian &J);
+
+  void applyTaylorJacobian();
 };
 
 #endif
