@@ -18,50 +18,54 @@
 
 using namespace std;
 
+typedef Eigen::MatrixXd Mxd;
+typedef Eigen::VectorXd Vxd;
+typedef std::function<std::tuple<Mxd,Mxd,Mxd>(
+  const Mxd&, const Mxd&, const Vxd&)> taylorJacobian;
+
 /* @brief Linear Model */
-class Linear{
+class Linear
+{
 
-    Eigen::MatrixXd A, B, Q;
+  int m, n, c;
 
-    int n;
+public:
+  Linear(
+      const Eigen::MatrixXd &A,
+      const Eigen::MatrixXd &B,
+      const Eigen::MatrixXd &Q);
 
-    public:
-      
-        Linear(  
-            const Eigen::MatrixXd& A,
-            const Eigen::MatrixXd& B, 
-            const Eigen::MatrixXd& Q
-        );
+  Linear(const Eigen::MatrixXd &Q, int m, int c);
 
-        ~Linear() {};
+  ~Linear(){};
 
-        void init();
+  void init();
 
-        void init(const Eigen::VectorXd& mu_0, Eigen::MatrixXd& Sigma_0);
+  void init(const Eigen::VectorXd &mu_0, Eigen::MatrixXd &Sigma_0);
 
-        void time_update(const Eigen::MatrixXd& u);
+  void time_update(const Eigen::MatrixXd &u);
 
-        Eigen::VectorXd mu_hat;
+  Eigen::MatrixXd A, B, Q;
 
-        Eigen::MatrixXd Sigma_hat;
+  Eigen::VectorXd mu_hat;
 
+  Eigen::MatrixXd Sigma_hat;
 };
-
 
 /* @brief Nonlinear Model */
 class NonLinear : public Linear
 {
+  taylorJacobian _J;
 
-    public:
-      
-        NonLinear(const Eigen::MatrixXd& Q);
+public:
+  NonLinear(const Eigen::MatrixXd &Q, int m, int c);
 
-        ~NonLinear() {};
+  ~NonLinear(){};
 
-        void time_update(const Eigen::MatrixXd& u);
+  /* load model */
+  void loadEq(const taylorJacobian &J);
 
-        /* Calc Jacobian Matrix */
-        virtual void approx_update() {};
+  void applyTaylorJacobian();
 };
 
 #endif
