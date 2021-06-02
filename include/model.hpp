@@ -45,6 +45,7 @@ public:
 
   void time_update(const Eigen::MatrixXd &u);
 
+  //variables
   Eigen::MatrixXd A, B, Q;
 
   Eigen::VectorXd mu_hat;
@@ -65,7 +66,7 @@ public:
   /* load model */
   void loadEq(const taylorJacobian &J);
 
-  void applyTaylorJacobian();
+  void applyTaylorJacobian(void);
 };
 
 #endif
