@@ -2,7 +2,8 @@ image: gcc
 
 stages:
   - build
-  - test
+  - test1 # kalman filter
+    test2 # extended kalman filter
 
 build:
   stage: build
@@ -10,7 +11,6 @@ build:
     - apt-get update --yes
     - apt-get install --yes cmake
     - apt-get install libeigen3-dev
-
   script:
     - mkdir build
     - cd build
@@ -18,10 +18,20 @@ build:
   artifacts:
     paths:
       - build
+  only:
+    - master
 
 # run tests using the binary built before
-test:
-  stage: test
+test1:
+  stage: kf_test
   script:
     - ./build/kf_test
+  only:
+    - master
+
+test2:
+  stage: ekf_test
+  script:
     - ./build/ekf_test
+  only:
+    - master
