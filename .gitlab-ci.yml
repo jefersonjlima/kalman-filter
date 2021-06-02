@@ -3,7 +3,7 @@ image: gcc
 stages:
   - build
   - kf_test   # kalman filter
-    ekf_test  # extended kalman filter
+  - ekf_test  # extended kalman filter
 
 build:
   stage: build
