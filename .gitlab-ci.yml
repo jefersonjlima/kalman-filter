@@ -2,8 +2,8 @@ image: gcc
 
 stages:
   - build
-  - test1 # kalman filter
-    test2 # extended kalman filter
+  - kf_test   # kalman filter
+    ekf_test  # extended kalman filter
 
 build:
   stage: build
@@ -22,14 +22,14 @@ build:
     - master
 
 # run tests using the binary built before
-test1:
+kf_test:
   stage: kf_test
   script:
     - ./build/kf_test
   only:
     - master
 
-test2:
+ekf_test:
   stage: ekf_test
   script:
     - ./build/ekf_test
