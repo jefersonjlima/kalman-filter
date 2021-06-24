@@ -1,9 +1,6 @@
 # Kalman Filter
 
-# Overview
-
-# Kalman Filter Algorithm:
-
+## Overview
 
 ## The Code Explained
 
@@ -25,7 +22,6 @@ void LinearSystem::time_update(const Eigen::MatrixXd& u){
     Sigma_hat = A * Sigma_hat * A.transpose() + Q;
 }
 ```
-
 
 ### Step 2:
 
@@ -58,3 +54,8 @@ To run it, use CMake:
     $ cd build
     $ cmake .. && $ make -j`nproc`
     $ ./kf-test
+
+
+## References
+
+- Sebastian Thrun, Wolfram Burgard, Dieter Fox. **Probabilistic Robotics** (Intelligent Robotics and Autonomous Agents series). The MIT Press, 2005.
