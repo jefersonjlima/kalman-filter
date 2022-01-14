@@ -17,19 +17,22 @@
 using namespace std;
 using namespace Eigen;
 
-std::tuple<MatrixXd, MatrixXd, VectorXd> l(
-    const Eigen::MatrixXd A,
-    const Eigen::MatrixXd B,
+std::tuple<MatrixXd, MatrixXd, VectorXd> myRobot(
+    const Eigen::MatrixXd& A,
+    const Eigen::MatrixXd& B,
     const VectorXd &mu)
 {
-  int n = 3; // Number of states
-  int m = 1; // Number of measurements
-  int c = 1; // Number of control inputs
-  MatrixXd z(m, m);
+
+  MatrixXd _A(3,3);
+ _A << mu(0)    , mu(1)    , mu(2),
+       0        , 0        , 1,
+       0         ,0        , 1;
+
+ MatrixXd z(1, 1);
 
   z << 0.1;
 
-  return {A, B, z};
+  return {_A, B, z};
 }
 
 int main(int argc, char **argv)
@@ -41,10 +44,6 @@ int main(int argc, char **argv)
 
   double dt = 1.0 / 30; // Time step
 
-  MatrixXd A(n, n); // System dynamics matrix
-  MatrixXd B(n, c); // Input control matrix
-  MatrixXd C(m, n); // Output matrix
-
   //initial conditions
   VectorXd mu_0(n, m);
   MatrixXd z(m, m);
@@ -53,46 +52,28 @@ int main(int argc, char **argv)
   MatrixXd Q(n, n); //covariance of the process noise;
   MatrixXd R(m, m); //covariance of the observation noise;
 
-  // Model
-  A << 1.0, dt, 0.0,
-      0.0, 1.0, dt,
-      0.0, 0.0, 1.0;
-  B << 0.0, 0.0, 0.0;
-  C << 1.0, 0.0, 0.0;
-
   mu_0 << 1.0, 0.0, 0.0;
   z << 0.1;
   u << 0.3;
 
   Sigma_0 << 1.0, 0.0, 0.0,
-      0.0, 1.0, 0.0,
-      0.0, 0.0, 1.0;
+             0.0, 1.0, 0.0,
+             0.0, 0.0, 1.0;
 
   Q << 1.0, 0.0, 0.0,
-      0.0, 1.0, 0.0,
-      0.0, 0.0, 1.0;
+       0.0, 1.0, 0.0,
+       0.0, 0.0, 1.0;
 
   R << 0.01;
 
-  cout << "A: \n"
-       << A << endl;
-  cout << "B: \n"
-       << B << endl;
-  cout << "C: \n"
-       << C << endl;
+  cout << "R: \n" << R << endl;
+  cout << "Q: \n" << Q << endl;
 
-  cout << "R: \n"
-       << R << endl;
-  cout << "Q: \n"
-       << Q << endl;
-
-  cout << "mu_0: \n"
-       << mu_0 << endl;
-  cout << "Sigma_0: \n"
-       << Sigma_0 << endl;
+  cout << "mu_0: \n" << mu_0 << endl;
+  cout << "Sigma_0: \n" << Sigma_0 << endl;
 
   KFilter<NonLinear> Robot(R, Q, m, c);
-  Robot.loadEq(l);
+  Robot.loadEq(myRobot);
   Robot.init(mu_0, Sigma_0);
 
   auto mu = mu_0;
@@ -102,8 +83,8 @@ int main(int argc, char **argv)
     cout << setprecision(2) << "Time: " << i * dt << "s" << endl;
 
     //linearization
-    mu = Robot.mu_hat;
     Robot.applyTaylorJacobian();
+
     //prediction
     Robot.time_update(u);
 
