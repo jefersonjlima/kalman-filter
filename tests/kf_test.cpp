@@ -11,24 +11,35 @@
  *  @date   April 07, 2021
  **/
 
-#include "kf.hpp"
 #include <iomanip>
+#include <kf/kf.hpp>
+#ifdef USE_MATPLOT
+ #include <matplot/matplot.h>
+#endif
 #include <random>
+
 
 using namespace std;
 using namespace Eigen;
+#ifdef USE_MATPLOT
+ using namespace matplot;
+#endif
 
 int main(int argc, char **argv)
 {
 
-  int n = 3; // Number of states
+  int n = 2; // Number of states
   int m = 1; // Number of measurements
   int c = 1; // Number of control inputs
 
   std::random_device rd;
   std::mt19937 rgen(rd());
   std::uniform_real_distribution<> R_dis(-0.5, 0.5);
-
+  double deltaT = 0.1; // Ts = 0.5 seconds
+  double vt;
+#ifdef USE_MATPLOT
+  vector<double> sensor, position, k;
+#endif
   MatrixXd A(n, n); // System dynamics matrix
   MatrixXd B(n, c); // Input control matrix
   MatrixXd C(m, n); // Output matrix
@@ -42,26 +53,22 @@ int main(int argc, char **argv)
   MatrixXd R(m, m); //covariance of the observation noise;
 
   // Model
+  A << 	1.0,	deltaT,
+    	0.0, 	1.0;
 
-  A << 1.1269, -0.4940, 0.1129,
-       1.0,    0.0,     0.0,
-       0.0,    1.0,     0.0;
+ B << 	0.0, 	deltaT;
+ C << 1.0, 0.0;
 
- B << -0.3832, 0.5919, 0.5191;
- C << 1.0, 0.0, 0.0;
+  mu_0 << 0.0, 5.0;
+  z << 2.2;
+  u << -2.0;
 
-  mu_0 << 0.0, 0.0, 0.0;
-  z << 0.1;
-  u << 0.0;
+  Sigma_0 << 0.01,	0.0,
+             0.0, 	1.0;
 
-  Sigma_0 << 1.0, 0.0, 0.0,
-             0.0, 1.0, 0.0,
-             0.0, 0.0, 1.0;
-
-  Q << 2.3, 0.0, 0.0,
-       0.0, 2.3, 0.0,
-       0.0, 0.0, 2.3;
-
+  Q << 	0.1, 	0.0,
+    	0.0, 	0.1;
+    	
   R << 1.0;
 
   cout << "A: \n" << A << endl;
@@ -74,26 +81,42 @@ int main(int argc, char **argv)
   cout << "mu_0: \n" << mu_0 << endl;
   cout << "Sigma_0: \n" << Sigma_0 << endl;
 
-  KFilter<Linear> Robot(A, B, C, Q, R);
-  Robot.init(mu_0, Sigma_0);
+  KFilter<Linear> Car(A, B, C, Q, R);
+  Car.init(mu_0, Sigma_0);
 
-  for (int t = 0; t < 10; t++)
+  cout << "time \t x1 \t x2" << endl;
+
+  for (int t = 0; t < 40; t++)
   {
+    cout << setprecision(2) << (double)t*deltaT << "s \n";
 
-    cout << setprecision(2) << "Time: " << t << "s" << endl;
-
+    u << -2.0;
     //prediction
-    u << sin(t/5);
-    Robot.time_update(u);
+    Car.time_update(u);
+    cout << "mu" <<    "\n" << Car.mu_hat    << endl;
+    cout << "sigma" << "\n" << Car.Sigma_hat << endl;
 
     //update
-    z << Robot.mu_hat[0] + R_dis(rgen);
-    Robot.measurement_update(z);
+    Car.measurement_update(z);
 
-    cout << "x_0: " << Robot.mu_hat[0] << endl;
-    cout << "x_1: " << Robot.mu_hat[1] << endl;
-    cout << "x_2: " << Robot.mu_hat[2] << endl;
+    cout << "mu" <<    "\n" << Car.mu_hat    << endl;
+    cout << "sigma" << "\n" << Car.Sigma_hat << endl;
+
+    //data record
+#ifdef USE_MATPLOT
+    sensor.push_back(z(0));
+    position.push_back(Car.mu_hat[0]);
+    k.push_back( (double)t * deltaT);
+#endif
+    // sensor mesurement
+    vt = R_dis(rgen);
+    z << Car.mu_hat[0] + vt; 
   }
+  //plot
+#ifdef USE_MATPLOT
+  plot(k, position, "--xr", k, sensor, "-:bs");
+  show();
+#endif
 
   return 0;
 }
