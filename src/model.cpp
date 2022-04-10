@@ -11,7 +11,7 @@
  *  @date   April 07, 2021
  **/
 
-#include "model.hpp"
+#include <kf/model.hpp>
 
 /* @brief Linear Model */
 Linear::Linear(
