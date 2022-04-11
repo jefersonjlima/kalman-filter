@@ -6,13 +6,7 @@
 
 ### Step 1:
 
-$`\textbf{Prediciton}({\mu_{t-1}, {\textstyle\sum}_{t-1}, u_t})`$
-
-$`\quad\quad\overline{\mu}_t = A_t\mu_{t-1} + B_t u_t`$
-
-$`\quad\quad\overline{\textstyle\sum}_t = A_t {\textstyle\sum}_{t-1} A_t^T+ Q_t`$
-
-$`\textbf{Return} \left(\overline{\mu}_t, \overline{\textstyle\sum}_t\right)`$
+![](https://latex.codecogs.com/svg.image?%5Cbegin%7Barray%7D%7Bll%7D%5Ctextbf%7BPrediciton%7D(%7B%5Cmu_%7Bt-1%7D,%20%7B%5Ctextstyle%5Csum%7D_%7Bt-1%7D,%20u_t%7D)%20%5C%5C%5Cquad%5Cquad%5Coverline%7B%5Cmu%7D_t%20=%20A_t%5Cmu_%7Bt-1%7D%20&plus;%20B_t%20u_t%20%5C%5C%5Cquad%5Cquad%5Coverline%7B%5Ctextstyle%5Csum%7D_t%20=%20A_t%20%7B%5Ctextstyle%5Csum%7D_%7Bt-1%7D%20A_t%5ET&plus;%20Q_t%5C%5C%5Ctextbf%7BReturn%7D%20%5Cleft(%5Coverline%7B%5Cmu%7D_t,%20%5Coverline%7B%5Ctextstyle%5Csum%7D_t%5Cright)%5Cend%7Barray%7D)
 
 code reference: 
 ```cpp
@@ -25,15 +19,7 @@ void LinearSystem::time_update(const Eigen::MatrixXd& u){
 
 ### Step 2:
 
-$`\textbf{Measurement Update}(\overline{\mu}_{t}, \overline{\textstyle\sum}_{t}, z_t)`$:
-
-$`\quad\quad K_t = \overline{\textstyle\sum}_tC_t^T(C_t\overline{\textstyle\sum}_tC_t^T+R_t)^{-1}`$
-
-$`\quad\quad \mu_t  = \overline{\mu}_t + K_t(z_t -C_t\overline\mu_t)`$
-
-$`\quad\quad \textstyle\sum_t = (I-K_tC_t)\overline{\textstyle\sum}_t`$
-
-$`\textbf{Return} \left(\mu_t, \textstyle\sum_t\right)`$
+![](https://latex.codecogs.com/svg.image?%5Cbegin%7Barray%7D%7Bll%7D%5Ctextbf%7BMeasurement%20Update%7D(%5Coverline%7B%5Cmu%7D_%7Bt%7D,%20%5Coverline%7B%5Ctextstyle%5Csum%7D_%7Bt%7D,%20z_t):%20%5C%5C%5Cquad%5Cquad%20K_t%20=%20%5Coverline%7B%5Ctextstyle%5Csum%7D_tC_t%5ET(C_t%5Coverline%7B%5Ctextstyle%5Csum%7D_tC_t%5ET&plus;R_t)%5E%7B-1%7D%5C%5C%5Cquad%5Cquad%20%5Cmu_t%20%20=%20%5Coverline%7B%5Cmu%7D_t%20&plus;%20K_t(z_t%20-C_t%5Coverline%5Cmu_t)%5C%5C%5Cquad%5Cquad%20%5Ctextstyle%5Csum_t%20=%20(I-K_tC_t)%5Coverline%7B%5Ctextstyle%5Csum%7D_t%5C%5C%5Ctextbf%7BReturn%7D%20%5Cleft(%5Cmu_t,%20%5Ctextstyle%5Csum_t%5Cright)%5Cend%7Barray%7D)
 
 code reference: 
 ```cpp
@@ -59,3 +45,4 @@ To run it, use CMake:
 ## References
 
 - Sebastian Thrun, Wolfram Burgard, Dieter Fox. **Probabilistic Robotics** (Intelligent Robotics and Autonomous Agents series). The MIT Press, 2005.
+
