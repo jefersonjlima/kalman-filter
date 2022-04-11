@@ -19,14 +19,14 @@ Linear::Linear(
     const Eigen::MatrixXd &B,
     const Eigen::MatrixXd &Q)
     : A(A), B(B), Q(Q),
-      n(A.rows()), mu_hat(n), Sigma_hat(n, n) {}
+      n_(A.rows()), mu_hat(n_), Sigma_hat(n_, n_) {}
 
 Linear::Linear(
-    const Eigen::MatrixXd& Q, int m, int c)
-    : Q(Q), m(m), c(c), n(Q.rows()), mu_hat(n), Sigma_hat(n, n)
+    const Eigen::MatrixXd& Q, int n, int m, int c)
+    : Q(Q), n_(n), m_(m), c_(c), mu_hat(n_), Sigma_hat(n_, n_)
 {
-  A = Eigen::MatrixXd(n, n).setZero();
-  B = Eigen::MatrixXd(n, c).setZero();
+  A = Eigen::MatrixXd(n_, n_).setZero();
+  B = Eigen::MatrixXd(n_, c_).setZero();
 }
 
 void Linear::init(const Eigen::VectorXd& mu_0, Eigen::MatrixXd& Sigma_0)
@@ -48,18 +48,18 @@ void Linear::time_update(const Eigen::MatrixXd& u)
 }
 
 /* @brief Nonlinear Model */
-NonLinear::NonLinear(const Eigen::MatrixXd& Q, int m, int c)
-    : Linear(Q, m, c)
+NonLinear::NonLinear(const Eigen::MatrixXd& Q, int n, int m, int c)
+    : Linear(Q, n, m, c), n_(n), m_(m), c_(c) 
 {
+  this->is_linear = false;
 }
 
-void NonLinear::loadEq(const taylorJacobian& J)
+void NonLinear::loadModelEqs(const dFdx& g_mu)
 {
-  _J = J;
+  g_mu_ = g_mu;
 }
 
-void NonLinear::applyTaylorJacobian()
+void NonLinear::applyModelJacobian()
 {
-  _J(A,B,mu_hat);
-
+  std::tie(A, B) = g_mu_(mu_hat, n_, m_, c_);
 }
