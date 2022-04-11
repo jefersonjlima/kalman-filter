@@ -12,37 +12,61 @@
  **/
 
 #include <kf/kf.hpp>
-#include <iomanip>
+#include <random>
+#ifdef USE_MATPLOT
+ #include <matplot/matplot.h>
+#endif
 
 using namespace std;
 using namespace Eigen;
+#ifdef USE_MATPLOT
+ using namespace matplot;
+#endif
 
-std::tuple<MatrixXd, MatrixXd, VectorXd> myRobot(
-    const Eigen::MatrixXd& A,
-    const Eigen::MatrixXd& B,
-    const VectorXd &mu)
+const double deltaT = 0.1;
+
+std::tuple<MatrixXd, MatrixXd> carModel(
+    const VectorXd &mu, int n, int m, int c)
 {
+  MatrixXd A(n, n);
+  MatrixXd B(n, c);
+    // Model
+  A << 	1.0,	deltaT,
+    	0.0, 	1.0;
 
-  MatrixXd _A(3,3);
- _A << mu(0)    , mu(1)    , mu(2),
-       0        , 0        , 1,
-       0         ,0        , 1;
+  B << 	0.0, 	deltaT;
+  //not to do here
+  return {A, B};
+}
 
- MatrixXd z(1, 1);
+std::tuple<MatrixXd, MatrixXd> sensorModel(
+    const VectorXd &mu, int n, int m, int c)
+{
+  const double S{20.0}, D{40.0};
+  MatrixXd C(m, n);
+  MatrixXd h(m, m);
+  C(0, 0) = S / ( std::pow(D-mu[0], 2) + std::pow(S, 2));
+  C(0, 1) = 0.0;
 
-  z << 0.1;
+  h << std::atan(S / (D-mu[0]));
 
-  return {_A, B, z};
+  return {C, h};
 }
 
 int main(int argc, char **argv)
 {
 
-  int n = 3; // Number of states
+  int n = 2; // Number of states
   int m = 1; // Number of measurements
   int c = 1; // Number of control inputs
 
-  double dt = 1.0 / 30; // Time step
+  std::random_device rd;
+  std::mt19937 rgen(rd());
+  std::uniform_real_distribution<> R_dis(-0.05, 0.05);
+  double vt;
+#ifdef USE_MATPLOT
+  vector<double> sensor, position, k;
+#endif
 
   //initial conditions
   VectorXd mu_0(n, m);
@@ -52,17 +76,16 @@ int main(int argc, char **argv)
   MatrixXd Q(n, n); //covariance of the process noise;
   MatrixXd R(m, m); //covariance of the observation noise;
 
-  mu_0 << 1.0, 0.0, 0.0;
-  z << 0.1;
-  u << 0.3;
 
-  Sigma_0 << 1.0, 0.0, 0.0,
-             0.0, 1.0, 0.0,
-             0.0, 0.0, 1.0;
+  mu_0 << 0.0, 5.0;
+  z << M_PI/6;
+  u << -2.0;
 
-  Q << 1.0, 0.0, 0.0,
-       0.0, 1.0, 0.0,
-       0.0, 0.0, 1.0;
+  Sigma_0 << 	0.01,	0.0,
+  		0.0, 	1.0;
+
+  Q << 	0.1, 	0.0,
+    	0.0, 	0.1;
 
   R << 0.01;
 
@@ -72,28 +95,52 @@ int main(int argc, char **argv)
   cout << "mu_0: \n" << mu_0 << endl;
   cout << "Sigma_0: \n" << Sigma_0 << endl;
 
-  KFilter<NonLinear> Robot(R, Q, m, c);
-  Robot.loadEq(myRobot);
-  Robot.init(mu_0, Sigma_0);
+  KFilter<NonLinear> Car(R, Q, n, m, c);
+  Car.loadModelEqs(carModel);
+  Car.loadSensorEqs(sensorModel);
+  Car.init(mu_0, Sigma_0);
 
   auto mu = mu_0;
-  for (int i = 0; i < 10; i++)
+  for (int t = 0; t < 40; t++)
   {
 
-    cout << setprecision(2) << "Time: " << i * dt << "s" << endl;
+    cout << (double)t*deltaT << "s \t";
 
     //linearization
-    Robot.applyTaylorJacobian();
+    Car.applyModelJacobian();
+    Car.applySensorJacobian();
 
     //prediction
-    Robot.time_update(u);
+    Car.time_update(u);
 
     //update
-    Robot.measurement_update(z);
+    Car.measurement_update(z);
 
-    cout << "x_0: " << Robot.mu_hat[0] << endl;
-    cout << "x_1: " << Robot.mu_hat[1] << endl;
+    cout << "z: " << z << "\t";
+    cout << "x_0: " << Car.mu_hat[0] << "\t";
+    cout << "x_1: " << Car.mu_hat[1] << endl;
+
+    //data record
+#ifdef USE_MATPLOT
+    sensor.push_back(z(0,0));
+    position.push_back(Car.mu_hat[0]);
+    k.push_back( (double)t * deltaT);
+#endif
+    // sensor mesurement
+    vt = R_dis(rgen);
+    z(0,0) = std::atan(20.0 / (40.0 - Car.mu_hat[0])) + vt + 0.001;
   }
+  //plot
+#ifdef USE_MATPLOT
+  auto ax1 = nexttile();
+  plot(ax1, k, position);
+  ylabel(ax1, "Position");
+
+  auto ax2 = nexttile();
+  plot(ax2, k, sensor);
+  ylabel(ax2, "Angle");
+  show();
+#endif
 
   return 0;
 }
