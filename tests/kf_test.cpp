@@ -11,13 +11,11 @@
  *  @date   April 07, 2021
  **/
 
-#include <iomanip>
 #include <kf/kf.hpp>
+#include <random>
 #ifdef USE_MATPLOT
  #include <matplot/matplot.h>
 #endif
-#include <random>
-
 
 using namespace std;
 using namespace Eigen;
@@ -56,19 +54,19 @@ int main(int argc, char **argv)
   A << 	1.0,	deltaT,
     	0.0, 	1.0;
 
- B << 	0.0, 	deltaT;
- C << 1.0, 0.0;
+  B << 	0.0, 	deltaT;
+  C << 1.0, 0.0;
 
   mu_0 << 0.0, 5.0;
   z << 2.2;
   u << -2.0;
 
-  Sigma_0 << 0.01,	0.0,
-             0.0, 	1.0;
+  Sigma_0 << 	0.01,	0.0,
+  		0.0, 	1.0;
 
   Q << 	0.1, 	0.0,
     	0.0, 	0.1;
-    	
+
   R << 1.0;
 
   cout << "A: \n" << A << endl;
@@ -88,19 +86,15 @@ int main(int argc, char **argv)
 
   for (int t = 0; t < 40; t++)
   {
-    cout << setprecision(2) << (double)t*deltaT << "s \n";
+    cout << (double)t*deltaT << "s \n";
 
     u << -2.0;
     //prediction
     Car.time_update(u);
-    cout << "mu" <<    "\n" << Car.mu_hat    << endl;
-    cout << "sigma" << "\n" << Car.Sigma_hat << endl;
 
     //update
     Car.measurement_update(z);
-
     cout << "mu" <<    "\n" << Car.mu_hat    << endl;
-    cout << "sigma" << "\n" << Car.Sigma_hat << endl;
 
     //data record
 #ifdef USE_MATPLOT
