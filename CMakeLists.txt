@@ -8,7 +8,7 @@ set(PROJECT_VERSION_PATCH 1)
 set(CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-option(WITH_PLOT_GRAPH "Option to use the Matplot++" ON)
+option(WITH_PLOT_GRAPH "Option to use the Matplot++" OFF)
 
 # Eigen
 find_package(Eigen3 REQUIRED)

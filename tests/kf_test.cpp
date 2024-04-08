@@ -16,6 +16,7 @@
 #ifdef USE_MATPLOT
  #include <matplot/matplot.h>
 #endif
+#include <iomanip>
 
 using namespace std;
 using namespace Eigen;
@@ -69,32 +70,35 @@ int main(int argc, char **argv)
 
   R << 1.0;
 
-  cout << "A: \n" << A << endl;
-  cout << "B: \n" << B << endl;
-  cout << "C: \n" << C << endl;
-
-  cout << "R: \n" << R << endl;
-  cout << "Q: \n" << Q << endl;
-
-  cout << "mu_0: \n" << mu_0 << endl;
-  cout << "Sigma_0: \n" << Sigma_0 << endl;
+//  cout << "A: \n" << A << endl;
+//  cout << "B: \n" << B << endl;
+//  cout << "C: \n" << C << endl;
+//
+//  cout << "R: \n" << R << endl;
+//  cout << "Q: \n" << Q << endl;
+//
+//  cout << "mu_0: \n" << mu_0 << endl;
+//  cout << "Sigma_0: \n" << Sigma_0 << endl;
 
   KFilter<Linear> Car(A, B, C, Q, R);
   Car.init(mu_0, Sigma_0);
 
-  cout << "time \t x1 \t x2" << endl;
-
+  cout << fixed;
+  cout << setprecision(3);
+  cout << "time\tx1\tx2" <<endl;
   for (int t = 0; t < 40; t++)
   {
-    cout << (double)t*deltaT << "s \n";
-
+    // print time
+    cout <<t*deltaT << "\t";
     u << -2.0;
     //prediction
     Car.time_update(u);
-
     //update
     Car.measurement_update(z);
-    cout << "mu" <<    "\n" << Car.mu_hat    << endl;
+    //print x1 and x2
+    cout << Car.mu_hat[0] << "\t"
+      << Car.mu_hat[1]
+      << endl;
 
     //data record
 #ifdef USE_MATPLOT
