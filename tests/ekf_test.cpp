@@ -13,15 +13,9 @@
 
 #include <kf/kf.hpp>
 #include <random>
-#ifdef USE_MATPLOT
- #include <matplot/matplot.h>
-#endif
 
 using namespace std;
 using namespace Eigen;
-#ifdef USE_MATPLOT
- using namespace matplot;
-#endif
 
 const double deltaT = 0.1;
 
@@ -89,12 +83,6 @@ int main(int argc, char **argv)
 
   R << 0.01;
 
-  cout << "R: \n" << R << endl;
-  cout << "Q: \n" << Q << endl;
-
-  cout << "mu_0: \n" << mu_0 << endl;
-  cout << "Sigma_0: \n" << Sigma_0 << endl;
-
   KFilter<NonLinear> Car(R, Q, n, m, c);
   Car.loadModelEqs(carModel);
   Car.loadSensorEqs(sensorModel);
@@ -120,27 +108,9 @@ int main(int argc, char **argv)
     cout << "x_0: " << Car.mu_hat[0] << "\t";
     cout << "x_1: " << Car.mu_hat[1] << endl;
 
-    //data record
-#ifdef USE_MATPLOT
-    sensor.push_back(z(0,0));
-    position.push_back(Car.mu_hat[0]);
-    k.push_back( (double)t * deltaT);
-#endif
     // sensor mesurement
     vt = R_dis(rgen);
     z(0,0) = std::atan(20.0 / (40.0 - Car.mu_hat[0])) + vt + 0.001;
   }
-  //plot
-#ifdef USE_MATPLOT
-  auto ax1 = nexttile();
-  plot(ax1, k, position);
-  ylabel(ax1, "Position");
-
-  auto ax2 = nexttile();
-  plot(ax2, k, sensor);
-  ylabel(ax2, "Angle");
-  show();
-#endif
-
   return 0;
 }

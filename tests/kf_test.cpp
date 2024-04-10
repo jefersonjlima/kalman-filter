@@ -13,16 +13,10 @@
 
 #include <kf/kf.hpp>
 #include <random>
-#ifdef USE_MATPLOT
- #include <matplot/matplot.h>
-#endif
 #include <iomanip>
 
 using namespace std;
 using namespace Eigen;
-#ifdef USE_MATPLOT
- using namespace matplot;
-#endif
 
 int main(int argc, char **argv)
 {
@@ -36,9 +30,6 @@ int main(int argc, char **argv)
   std::uniform_real_distribution<> R_dis(-0.5, 0.5);
   double deltaT = 0.1; // Ts = 0.5 seconds
   double vt;
-#ifdef USE_MATPLOT
-  vector<double> sensor, position, k;
-#endif
   MatrixXd A(n, n); // System dynamics matrix
   MatrixXd B(n, c); // Input control matrix
   MatrixXd C(m, n); // Output matrix
@@ -70,16 +61,6 @@ int main(int argc, char **argv)
 
   R << 1.0;
 
-//  cout << "A: \n" << A << endl;
-//  cout << "B: \n" << B << endl;
-//  cout << "C: \n" << C << endl;
-//
-//  cout << "R: \n" << R << endl;
-//  cout << "Q: \n" << Q << endl;
-//
-//  cout << "mu_0: \n" << mu_0 << endl;
-//  cout << "Sigma_0: \n" << Sigma_0 << endl;
-
   KFilter<Linear> Car(A, B, C, Q, R);
   Car.init(mu_0, Sigma_0);
 
@@ -100,21 +81,10 @@ int main(int argc, char **argv)
       << Car.mu_hat[1]
       << endl;
 
-    //data record
-#ifdef USE_MATPLOT
-    sensor.push_back(z(0));
-    position.push_back(Car.mu_hat[0]);
-    k.push_back( (double)t * deltaT);
-#endif
     // sensor mesurement
     vt = R_dis(rgen);
     z << Car.mu_hat[0] + vt; 
   }
   //plot
-#ifdef USE_MATPLOT
-  plot(k, position, "--xr", k, sensor, "-:bs");
-  show();
-#endif
-
   return 0;
 }
